@@ -1,6 +1,10 @@
 "use client";
 
-import { SiGithub, SiOrcid } from "@icons-pack/react-simple-icons";
+import {
+    SiGithub,
+    SiGooglescholar,
+    SiOrcid,
+} from "@icons-pack/react-simple-icons";
 import { Mail } from "lucide-react";
 import {
     AnimatePresence,
@@ -100,6 +104,7 @@ const Flare = () => {
         const handleMouseMove = (e: MouseEvent) => {
             setMousePosition({ x: e.clientX, y: e.clientY });
         };
+
         window.addEventListener("mousemove", handleMouseMove);
         return () => window.removeEventListener("mousemove", handleMouseMove);
     }, [isMobile]);
@@ -528,6 +533,235 @@ const GlowEffect = ({ delay }: { delay: number }) => {
     );
 };
 
+const WebsiteShowcase = () => {
+    // Desktop hover state
+    const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+    // Mobile accordion state
+    const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
+    const [isMobile, setIsMobile] = useState(false);
+
+    const mouseX = useMotionValue(0);
+    const mouseY = useMotionValue(0);
+
+    const springX = useSpring(mouseX, { stiffness: 250, damping: 25 });
+    const springY = useSpring(mouseY, { stiffness: 250, damping: 25 });
+
+    useEffect(() => {
+        // Initial check
+        const checkMobile = () => setIsMobile(window.innerWidth < 768);
+        checkMobile();
+
+        const handleResize = () => checkMobile();
+        const handleMouseMove = (e: MouseEvent) => {
+            mouseX.set(e.clientX);
+            mouseY.set(e.clientY);
+        };
+
+        window.addEventListener("resize", handleResize);
+        window.addEventListener("mousemove", handleMouseMove);
+
+        return () => {
+            window.removeEventListener("resize", handleResize);
+            window.removeEventListener("mousemove", handleMouseMove);
+        };
+    }, [mouseX, mouseY]);
+
+    const websites = [
+        {
+            title: "Himig Isko",
+            category: "news/publication website",
+            url: "https://himigisko.com",
+        },
+        {
+            title: "Places and Landscapes",
+            category: "geog 1 final output",
+            url: "https://geog.j3z.dev",
+        },
+        {
+            title: "Philosophical Inquiries",
+            category: "philo 1 final output",
+            url: "https://philo.j3z.dev",
+        },
+    ];
+
+    return (
+        <section id="websites" className="py-6 px-4 sm:px-8 relative">
+            <div className="max-w-4xl mx-auto relative z-10">
+                <motion.h2
+                    className="text-xs sm:text-sm font-medium bg-linear-to-r from-cyan-200 to-purple-200 bg-clip-text text-transparent mb-8 sm:mb-12 relative"
+                    initial={{ opacity: 0, y: 30 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.8 }}
+                    viewport={{ once: true }}
+                >
+                    <motion.span
+                        initial={{ width: 0 }}
+                        whileInView={{ width: "100%" }}
+                        transition={{ duration: 1, delay: 0.5 }}
+                        className="absolute -bottom-2 left-0 h-px bg-linear-to-r from-cyan-400 via-purple-400 to-transparent"
+                    />
+                    web showcase
+                </motion.h2>
+
+                <div className="space-y-4">
+                    {websites.map((site, index) => (
+                        <div key={index} className="relative">
+                            {/* List Item Header */}
+                            <motion.div
+                                className="block group relative z-20 border-b border-white/5 pb-4 cursor-pointer"
+                                initial={{ opacity: 0, x: -20 }}
+                                whileInView={{ opacity: 1, x: 0 }}
+                                transition={{ delay: index * 0.1 }}
+                                viewport={{ once: true }}
+                                onMouseEnter={() =>
+                                    !isMobile && setHoveredIndex(index)
+                                }
+                                onMouseLeave={() =>
+                                    !isMobile && setHoveredIndex(null)
+                                }
+                                onClick={() => {
+                                    if (isMobile) {
+                                        setExpandedIndex(
+                                            expandedIndex === index
+                                                ? null
+                                                : index,
+                                        );
+                                    } else {
+                                        window.open(
+                                            site.url,
+                                            "_blank",
+                                            "noopener,noreferrer",
+                                        );
+                                    }
+                                }}
+                            >
+                                <div className="flex justify-between items-baseline">
+                                    <span
+                                        className={`text-xs sm:text-sm font-light transition-colors duration-300 ${
+                                            (
+                                                isMobile &&
+                                                    expandedIndex === index
+                                            ) ||
+                                            (
+                                                !isMobile &&
+                                                    hoveredIndex === index
+                                            )
+                                                ? "text-cyan-300"
+                                                : "text-slate-300 group-hover:text-cyan-300"
+                                        }`}
+                                    >
+                                        {site.title}
+                                    </span>
+                                    <span className="text-xs text-slate-500 group-hover:text-purple-300 transition-colors duration-300 font-mono">
+                                        {site.category}
+                                    </span>
+                                </div>
+                            </motion.div>
+
+                            {/* MOBILE: Inline Accordion Preview */}
+                            <AnimatePresence>
+                                {isMobile && expandedIndex === index && (
+                                    <motion.div
+                                        initial={{ height: 0, opacity: 0 }}
+                                        animate={{ height: "auto", opacity: 1 }}
+                                        exit={{ height: 0, opacity: 0 }}
+                                        transition={{ duration: 0.3 }}
+                                        className="overflow-hidden"
+                                    >
+                                        <div className="pt-4 pb-8">
+                                            <div className="relative w-full aspect-video bg-slate-900 border border-cyan-500/30 rounded-lg overflow-hidden">
+                                                <iframe
+                                                    src={site.url}
+                                                    title={site.title}
+                                                    className="w-full h-full border-0"
+                                                    loading="lazy"
+                                                />
+                                                {/* Mobile Overlay to allow scrolling without getting stuck in iframe */}
+                                                <div className="absolute inset-0 pointer-events-none border border-white/5 rounded-lg" />
+                                            </div>
+                                            <a
+                                                href={site.url}
+                                                target="_blank"
+                                                rel="noreferrer"
+                                                className="mt-2 inline-flex items-center gap-2 text-xs text-cyan-400 font-mono hover:underline"
+                                            >
+                                                visit site →
+                                            </a>
+                                        </div>
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
+                        </div>
+                    ))}
+                </div>
+            </div>
+
+            {!isMobile && (
+                <motion.div
+                    className="fixed pointer-events-none z-30 overflow-hidden rounded-lg border border-cyan-500/30 bg-slate-950 shadow-2xl shadow-cyan-500/10"
+                    style={{
+                        x: springX,
+                        y: springY,
+                        top: -150,
+                        left: 40,
+                        width: 400,
+                        height: 300,
+                        opacity: hoveredIndex !== null ? 1 : 0, // Fade in/out
+                        scale: hoveredIndex !== null ? 1 : 0.8, // Scale effect
+                    }}
+                    transition={{
+                        opacity: { duration: 0.2 },
+                        scale: { duration: 0.2 },
+                    }}
+                >
+                    {/* Header Bar */}
+                    <div className="absolute top-0 left-0 right-0 h-6 bg-slate-900/90 border-b border-white/10 flex items-center px-3 gap-1.5 z-20 backdrop-blur-md">
+                        <div className="w-2 h-2 rounded-full bg-red-500/50" />
+                        <div className="w-2 h-2 rounded-full bg-yellow-500/50" />
+                        <div className="w-2 h-2 rounded-full bg-green-500/50" />
+                        <div className="ml-2 text-[8px] text-slate-500 font-mono truncate opacity-50">
+                            {hoveredIndex !== null
+                                ? websites[hoveredIndex].url
+                                : ""}
+                        </div>
+                    </div>
+
+                    {/* Preloaded Iframes Stack */}
+                    <div className="relative w-full h-full mt-6 bg-slate-900">
+                        {websites.map((site, index) => (
+                            <div
+                                key={index}
+                                className="absolute inset-0 w-[1000px] h-[750px] origin-top-left scale-[0.4] bg-white transition-opacity duration-300"
+                                style={{
+                                    opacity: hoveredIndex === index ? 1 : 0,
+                                    zIndex: hoveredIndex === index ? 10 : 0,
+                                    // Use 'visibility' to ensure hidden iframes don't grab focus but stay loaded
+                                    visibility:
+                                        hoveredIndex === index
+                                            ? "visible"
+                                            : "hidden",
+                                }}
+                            >
+                                <iframe
+                                    src={site.url}
+                                    title={site.title}
+                                    className="w-full h-full border-0"
+                                    // tabIndex -1 removes them from keyboard navigation flow
+                                    tabIndex={-1}
+                                />
+                            </div>
+                        ))}
+
+                        {/* Aesthetic Overlays */}
+                        <div className="absolute inset-0 z-20 bg-cyan-900/10 mix-blend-overlay pointer-events-none" />
+                        <div className="absolute inset-0 z-20 bg-linear-to-b from-transparent via-cyan-400/5 to-transparent opacity-50 bg-[length:100%_4px] pointer-events-none" />
+                    </div>
+                </motion.div>
+            )}
+        </section>
+    );
+};
+
 export default function Home() {
     const { scrollYProgress } = useScroll();
     const y1 = useTransform(scrollYProgress, [0, 1], [0, -100]);
@@ -725,7 +959,7 @@ export default function Home() {
                             transition={{ duration: 0.8, delay: 1 }}
                         >
                             <TypingAnimation
-                                text="a bs stat student at up diliman. trailblazing into the imperfect tomorrow."
+                                text="a bs stat student at up diliman. :>"
                                 className="text-xs sm:text-sm md:text-base text-slate-200 font-light"
                             />
                         </motion.div>
@@ -750,7 +984,7 @@ export default function Home() {
                             {
                                 title: "about",
                                 content:
-                                    "currently unwrapping problems. constantly negotiating with the borrow checker to create things that are as beautiful as they are bulletproof.",
+                                    'hi! im jez. he/him. my favorite quote is "as the protagonist of your own story, it\'s up to you to overcome and forge ahead" - welt from hsr',
                                 delay: 0.2,
                             },
                             {
@@ -776,7 +1010,7 @@ export default function Home() {
                                 delay: 0.3,
                             },
                             {
-                                title: "contact",
+                                title: "socials",
                                 content: "links",
                                 delay: 0.6,
                             },
@@ -823,7 +1057,7 @@ export default function Home() {
                                     />
                                 </motion.h2>
 
-                                {section.title === "contact" ? (
+                                {section.title === "socials" ? (
                                     <div className="space-y-3">
                                         {[
                                             {
@@ -840,6 +1074,11 @@ export default function Home() {
                                                 icon: SiOrcid,
                                                 label: "orcid",
                                                 href: "https://orcid.org/0009-0001-4302-7946",
+                                            },
+                                            {
+                                                icon: SiGooglescholar,
+                                                label: "google scholar",
+                                                href: "https://scholar.google.com/citations?hl=en&user=VH5-dGgAAAAJ",
                                             },
                                         ].map((contact, contactIndex) => (
                                             <MagneticCursor key={contact.label}>
@@ -866,6 +1105,12 @@ export default function Home() {
                                                         x: 4,
                                                         scale: 1.02,
                                                     }}
+                                                    target={
+                                                        contact.label ===
+                                                        "email"
+                                                            ? undefined
+                                                            : "_blank"
+                                                    }
                                                 >
                                                     <motion.div
                                                         whileHover={{
@@ -944,7 +1189,7 @@ export default function Home() {
                 </div>
             </section>
 
-            <section id="work" className="py-16 sm:py-20 px-4 sm:px-8 relative">
+            <section id="work" className="py-6 sm:py-8 px-4 sm:px-8 relative">
                 <GlowEffect delay={3} />
                 <div className="max-w-4xl mx-auto relative z-10">
                     <motion.h2
@@ -1101,6 +1346,8 @@ export default function Home() {
                 </div>
             </section>
 
+            <WebsiteShowcase />
+
             <footer className="py-12 sm:py-16 px-4 sm:px-8 relative">
                 <GlowEffect delay={6} />
                 <motion.div
@@ -1136,7 +1383,8 @@ export default function Home() {
                         transition={{ duration: 0.8, delay: 0.5 }}
                         viewport={{ once: true }}
                     >
-                        © 2025 jez • may this journey lead us starward
+                        © 2026 jez, all rights reserved • may this journey lead
+                        us starward
                     </motion.p>
                 </motion.div>
             </footer>
